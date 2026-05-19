@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoucherHub PRO - Test Payment</title>
+    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background-color: #f4f4f9; padding: 50px; }
+        .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: inline-block; max-width: 400px; width: 100%; }
+        h1 { color: #5c2d91; }
+        p { color: #555; font-size: 16px; }
+        .btn { background-color: #f1c40f; color: #333; font-weight: bold; border: none; padding: 15px 30px; font-size: 18px; border-radius: 25px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; margin-top: 20px; }
+        .btn:hover { background-color: #f39c12; }
+        .status { margin-top: 20px; font-weight: bold; color: #e74c3c; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h1>VoucherHub PRO</h1>
+    <p>Step 10 ko Green karne ke liye niche diye gaye button par click karke ek chota sa test payment complete karein.</p>
+    
+    <button class="btn" id="pay-btn">Pay 0.1 Pi (Test)</button>
+    <div class="status" id="status-text">Pi App ke andar open karein...</div>
+</div>
+
+<script>
+    // Pi SDK Initialize
+    const Pi = window.Pi;
+    Pi.init({ version: "2.0", sandbox: false });
+
+    document.getElementById('pay-btn').addEventListener('click', async () => {
+        const statusText = document.getElementById('status-text');
+        statusText.style.color = '#3498db';
+        statusText.innerText = "Payment shuru ho raha hai...";
+
+        try {
+            // Test payment request
+            const payment = await Pi.createPayment({
+                amount: 0.1,
+                memo: "Step 10 Validation Payment for VoucherHub PRO",
+                metadata: { orderId: "step10-test-" + Date.now() }
+            }, {
+                onReadyForServerApproval: (paymentId) => {
+                    statusText.style.color = '#f39c12';
+                    statusText.innerText = "Server approval ka wait hai (Aapka payment process mein hai)...";
+                },
+                onReadyForServerCompletion: (paymentId, txid) => {
+                    statusText.style.color = '#2ecc71';
+                    statusText.innerText = "Payment Complete! Ab Pi Browser mein jaakar check karein.";
+                },
+                onCancel: (paymentId) => {
+                    statusText.style.color = '#e74c3c';
+                    statusText.innerText = "Payment cancel kar diya gaya.";
+                },
+                onError: (error, payment) => {
+                    statusText.style.color = '#e74c3c';
+                    statusText.innerText = "Error: " + error.message;
+                }
+            });
+        } catch (err) {
+            statusText.style.color = '#e74c3c';
+            statusText.innerText = "Syste Error: Pi Browser ke andar hi chalega.";
+        }
+    });
+</script>
+
+</body>
+</html>
